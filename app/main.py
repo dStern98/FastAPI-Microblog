@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import connectDB, users
+from .routers import connectDB, users, posts, likes, login
 
 app = FastAPI()
 
@@ -18,3 +18,6 @@ app.add_middleware(
 
 app.include_router(connectDB.router)
 app.include_router(users.router)
+app.include_router(posts.router)
+app.include_router(likes.router)
+app.include_router(login.router)

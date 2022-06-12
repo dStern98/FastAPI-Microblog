@@ -2,13 +2,16 @@ from pydantic import BaseModel, BaseSettings, EmailStr, constr
 from os import path
 import datetime
 from typing import Optional, Union, List
-
+from enum import Enum
 
 ENV_PATH = path.join(path.dirname(__file__), "..", ".env")
 
 
 class Settings(BaseSettings):
     MONGO_URI: str
+    SECRET: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     class Config:
         env_file = ENV_PATH
@@ -36,7 +39,7 @@ class UpdateUser(BaseModel):
 
 
 class ReadUser(BaseModel):
-    id: str
+    userID: str
     first_name: str
     last_name: str
     email: EmailStr
@@ -58,11 +61,9 @@ class CreatePost(BaseModel):
     content: constr(max_length=250)
 
 
-class PostDB(BaseModel):
-    title: constr(max_length=50)
-    content: constr(max_length=250)
-    created: datetime.datetime
-    updated: Optional[datetime.datetime] = None
+class PostDB(CreatePost):
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
     userID: str
     likes: int = 0
     dislikes: int = 0
@@ -71,3 +72,37 @@ class PostDB(BaseModel):
 class UpdatePostDB(BaseModel):
     title: Optional[constr(max_length=50)] = None
     content: Optional[constr(max_length=250)] = None
+
+
+"""
+Create a Likes/Dislikes Collection
+"""
+
+
+class LikeType(str, Enum):
+    like = "like"
+    dislike = "dislike"
+
+
+class Action(BaseModel):
+    action: LikeType
+
+
+class LikeDislike(BaseModel):
+    userID: str
+    postID: str
+    action: LikeType
+
+
+"""
+Auth related Models
+"""
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    userID: str
