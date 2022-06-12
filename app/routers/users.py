@@ -4,7 +4,7 @@ from .connectDB import inject_mongo_client
 import datetime
 from ..utils import verify_object_ID, hash_password
 from typing import Optional
-from ..Auth import get_current_user
+from ..auth import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

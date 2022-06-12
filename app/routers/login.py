@@ -2,7 +2,7 @@ from http.client import HTTPException
 from fastapi import APIRouter, Depends, HTTPException, status
 from ..utils import verify_password
 from .connectDB import inject_mongo_client
-from ..Auth import create_access_token
+from ..auth import create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 from ..models import Token
 

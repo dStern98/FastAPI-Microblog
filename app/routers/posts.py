@@ -4,7 +4,7 @@ from .connectDB import inject_mongo_client
 import datetime
 from ..utils import verify_object_ID
 from typing import Optional
-from ..Auth import get_current_user
+from ..auth import get_current_user
 import pymongo
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
