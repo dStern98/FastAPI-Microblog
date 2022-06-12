@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from .connectDB import inject_mongo_client
 from ..models import Action
 from ..controllers.voting_logic import VotingLogic
-from ..auth import get_current_user
+from ..oauth2 import get_current_user
 
 
 router = APIRouter(prefix="/vote", tags=["Vote"])

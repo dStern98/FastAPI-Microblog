@@ -13,6 +13,10 @@ SECRET_KEY = SETTINGS.SECRET
 ALGORITHM = SETTINGS.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = SETTINGS.ACCESS_TOKEN_EXPIRE_MINUTES
 
+"""
+Create JWT Tokens, Verify JWT Tokens, get_current_user to be used for all guarded routes
+"""
+
 
 def create_access_token(data: dict):
     to_encode = data.copy()
