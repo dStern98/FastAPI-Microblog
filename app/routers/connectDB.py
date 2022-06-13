@@ -14,7 +14,6 @@ mongoClient = {"mongo_client": None}
 async def connect_DB():
     mongoClient["mongo_client"] = motor.motor_asyncio.AsyncIOMotorClient(
         SETTINGS.MONGO_URI)
-    print("Connected to MongoDB...")
 
 
 async def inject_mongo_client():

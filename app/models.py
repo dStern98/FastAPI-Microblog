@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     SECRET: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    DATABASE_NAME: str
 
     class Config:
         env_file = ENV_PATH

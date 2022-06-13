@@ -40,7 +40,7 @@ def verify_access_token(token: str):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), client=Depends(inject_mongo_client)):
-    users_collection = client["MicroBlog"]["users"]
+    users_collection = client[SETTINGS.DATABASE_NAME]["users"]
 
     token_model = verify_access_token(token)
     try:
@@ -49,6 +49,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), client=Depends(i
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Invalid credentials.", headers={"WWW-Authenticate": "Bearer"})
     current_user = await users_collection.find_one({"_id": token_id})
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials.")
     current_user = {key: value for key,
                     value in current_user.items() if key != "_id"}
     current_user["userID"] = str(token_id)

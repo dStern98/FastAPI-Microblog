@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from ..models import CreatePost, PostDB, UpdatePostDB
-from .connectDB import inject_mongo_client
+from .connectDB import inject_mongo_client, SETTINGS
 import datetime
 from ..utils import verify_object_ID
 from typing import Optional
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def post_post(post: CreatePost, current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
-    posts_collection = client["MicroBlog"]["posts"]
+    posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
     post_dict = post.dict()
 
     post_dict["created_at"] = datetime.datetime.utcnow()
@@ -27,7 +27,7 @@ async def post_post(post: CreatePost, current_user=Depends(get_current_user), cl
 
 @router.get('/all/')
 async def get_all_posts(client=Depends(inject_mongo_client)):
-    posts_collection = client["MicroBlog"]["posts"]
+    posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
     all_posts = await posts_collection.find({}).to_list(length=100)
     for post in all_posts:
         post["postID"] = str(post["_id"])
@@ -37,7 +37,7 @@ async def get_all_posts(client=Depends(inject_mongo_client)):
 
 @router.delete("/{postID}/")
 async def delete_post(postID: str, current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
-    posts_collection = client["MicroBlog"]["posts"]
+    posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
     postID_BSON = verify_object_ID(postID)
 
     # First, you must check if the user owns the associated post, otherwise reject request
@@ -61,7 +61,7 @@ async def delete_post(postID: str, current_user=Depends(get_current_user), clien
 
 @router.patch("/{postID}/")
 async def update_post(postID: str, update_to_post: UpdatePostDB, current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
-    posts_collection = client["MicroBlog"]["posts"]
+    posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
     postID_BSON = verify_object_ID(postID)
 
     # Pydantic will default any missing keys to a value of None, parse those out
@@ -93,7 +93,7 @@ async def update_post(postID: str, update_to_post: UpdatePostDB, current_user=De
 @router.get("/")
 async def get_some_posts(title: Optional[str] = None, userID: Optional[str] = None,
                          skip: Optional[int] = 0, client=Depends(inject_mongo_client)):
-    posts_collection = client["MicroBlog"]["posts"]
+    posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
     query_dictionary = {}
 
     if title:
