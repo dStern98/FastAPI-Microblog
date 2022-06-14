@@ -1,3 +1,6 @@
+from jose import jwt
+from app.routers.connectDB import SETTINGS
+
 
 def test_login_no_user(clear_collections, test_client):
     login_response = test_client.post(
@@ -20,4 +23,11 @@ def test_correct_login(clear_collections, get_users, login_user1, test_client):
         "username", "password"]}
     login_response = test_client.post("/login/", data=user1_password_form)
     assert login_response.status_code == 200
-    print(login_response.json())
+
+    token = login_response.json()["access_token"]
+    payload = jwt.decode(token, SETTINGS.SECRET,
+                         algorithms=[SETTINGS.ALGORITHM])
+    userID = payload.get("userID")
+    user_from_token = test_client.get(
+        "/users/search/", params={"username_search": user1["username"]})
+    assert user_from_token.json()["Users"][0]["userID"] == userID

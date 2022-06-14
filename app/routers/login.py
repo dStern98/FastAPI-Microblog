@@ -13,10 +13,10 @@ router = APIRouter(tags=["Authentication"])
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), client=Depends(inject_mongo_client)):
     users_collection = client[SETTINGS.DATABASE_NAME]["users"]
     user = await users_collection.find_one({"username": form_data.username})
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials.")
-    print(f"Comparing {form_data.password} to {user['password']}")
     if not verify_password(form_data.password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials.")

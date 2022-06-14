@@ -25,16 +25,6 @@ async def post_post(post: CreatePost, current_user=Depends(get_current_user), cl
     return {"Message": "Successfully inserted the document."}
 
 
-@router.get('/all/')
-async def get_all_posts(client=Depends(inject_mongo_client)):
-    posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
-    all_posts = await posts_collection.find({}).to_list(length=100)
-    for post in all_posts:
-        post["postID"] = str(post["_id"])
-        del post["_id"]
-    return all_posts
-
-
 @router.delete("/{postID}/")
 async def delete_post(postID: str, current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
     posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
