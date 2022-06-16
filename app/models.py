@@ -96,6 +96,16 @@ class LikeDislike(BaseModel):
 
 
 """
+The below two models would be used when the front-end needs to know
+if a logged in user has liked/disliked a set of posts in their feed
+"""
+
+
+class postGetAction(BaseModel):
+    postIDs: List[str]
+
+
+"""
 Auth related Models
 """
 

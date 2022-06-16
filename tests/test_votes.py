@@ -141,3 +141,37 @@ def test_vote_two_users(clear_collections, login_user1, login_user2, get_posts, 
     get_post4 = test_client.get("/posts/", params={"title": post2["title"]})
     assert get_post4.json()["Posts"][0]["likes"] == 1
     assert get_post4.json()["Posts"][0]["dislikes"] == 1
+
+
+def test_check_user_actions(clear_collections, login_user1, get_posts, test_client):
+    post1 = get_posts[0]
+    header_dict = {"Authorization": f"Bearer {login_user1}"}
+    test_client.post("/posts/", headers=header_dict, json=post1)
+    postID = test_client.get("/posts/").json()["Posts"][0]["postID"]
+
+    # Now vote on the post
+    like_post = test_client.post(
+        "/vote/", headers=header_dict, params={"postID": postID}, json={"action": "like"})
+
+    # Now check the users vote on that post
+    vote_action = test_client.post(
+        "/vote/userVotes/", headers=header_dict, json={"postIDs": [postID]})
+    assert vote_action.status_code == 200
+    assert vote_action.json()["User_Votes"][0]["action"] == "like"
+
+
+def test_check_post_actions(clear_collections, login_user1, get_posts, test_client):
+    post1 = get_posts[0]
+    header_dict = {"Authorization": f"Bearer {login_user1}"}
+    test_client.post("/posts/", headers=header_dict, json=post1)
+    postID = test_client.get("/posts/").json()["Posts"][0]["postID"]
+
+    # Now vote on the post
+    like_post = test_client.post(
+        "/vote/", headers=header_dict, params={"postID": postID}, json={"action": "like"})
+
+    # Now check the posts votes
+    vote_action = test_client.post(
+        "/vote/postVotes/", params={"postID": postID})
+    assert vote_action.status_code == 200
+    assert vote_action.json()["Post_Votes"][0]["action"] == "like"

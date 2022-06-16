@@ -50,7 +50,8 @@ async def delete_post(postID: str, current_user=Depends(get_current_user), clien
 
 
 @router.patch("/{postID}/")
-async def update_post(postID: str, update_to_post: UpdatePostDB, current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
+async def update_post(postID: str, update_to_post: UpdatePostDB, current_user=Depends(get_current_user),
+                      client=Depends(inject_mongo_client)):
     posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
     postID_BSON = verify_object_ID(postID)
 
