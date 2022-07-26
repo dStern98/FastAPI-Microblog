@@ -1,9 +1,9 @@
 from ..models import Settings
 import motor.motor_asyncio
 from fastapi import APIRouter, HTTPException, status
+from ..utils import mongoURI
 
-
-SETTINGS = Settings()
+settings = Settings()
 router = APIRouter()
 
 mongoClient = {"mongo_client": None}
@@ -13,7 +13,8 @@ mongoClient = {"mongo_client": None}
 @router.on_event("startup")
 async def connect_DB():
     mongoClient["mongo_client"] = motor.motor_asyncio.AsyncIOMotorClient(
-        SETTINGS.MONGO_URI)
+        mongoURI)
+    print("Connected to DB...")
 
 
 async def inject_mongo_client():
@@ -21,3 +22,8 @@ async def inject_mongo_client():
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Startup script failed to run.")
     return mongoClient["mongo_client"]
+
+
+@router.get("/")
+def health_check():
+    return {"Message": "Hello World!"}

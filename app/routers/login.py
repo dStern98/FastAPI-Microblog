@@ -1,8 +1,8 @@
 from http.client import HTTPException
 from fastapi import APIRouter, Depends, HTTPException, status
 from ..utils import verify_password
-from .connectDB import inject_mongo_client, SETTINGS
-from ..oauth2 import create_access_token
+from .connectDB import inject_mongo_client, settings
+from ..auth import create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 from ..models import Token
 
@@ -11,15 +11,15 @@ router = APIRouter(tags=["Authentication"])
 
 @router.post("/login/", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), client=Depends(inject_mongo_client)):
-    users_collection = client[SETTINGS.DATABASE_NAME]["users"]
+    users_collection = client[settings.mongodb_database]["users"]
     user = await users_collection.find_one({"username": form_data.username})
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials.")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials.")
     if not verify_password(form_data.password, user["password"]):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials.")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials.")
 
     access_token = create_access_token({"userID": str(user["_id"])})
 

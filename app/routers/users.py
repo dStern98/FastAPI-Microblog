@@ -1,17 +1,17 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from ..models import CreateUser, UpdateUser, ReadUsers
-from .connectDB import inject_mongo_client, SETTINGS
+from .connectDB import inject_mongo_client, settings
 import datetime
 from ..utils import verify_object_ID, hash_password
 from typing import Optional
-from ..oauth2 import get_current_user
+from ..auth import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(new_user: CreateUser, client=Depends(inject_mongo_client)):
-    users_collection = client[SETTINGS.DATABASE_NAME]["users"]
+    users_collection = client[settings.mongodb_database]["users"]
 
     # First, check if someone already has taken the submitted username
     username_already_exists = await users_collection.find_one({"username": new_user.username})
@@ -34,7 +34,7 @@ async def create_user(new_user: CreateUser, client=Depends(inject_mongo_client))
 
 @router.delete("/")
 async def delete_user(current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
-    users_collection = client[SETTINGS.DATABASE_NAME]["users"]
+    users_collection = client[settings.mongodb_database]["users"]
     object_id = verify_object_ID(current_user.userID)
     user = await users_collection.delete_one({"_id": object_id})
     return {"Message": f"Successfully deleted document with UserID {current_user.userID}"}
@@ -42,7 +42,7 @@ async def delete_user(current_user=Depends(get_current_user), client=Depends(inj
 
 @router.patch("/")
 async def update_user(updated_user: UpdateUser, current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
-    users_collection = client[SETTINGS.DATABASE_NAME]["users"]
+    users_collection = client[settings.mongodb_database]["users"]
     object_id = verify_object_ID(current_user.userID)
 
     updated_user_dict = {key: value for key,
@@ -60,7 +60,7 @@ async def update_user(updated_user: UpdateUser, current_user=Depends(get_current
 @router.get("/search/", response_model=ReadUsers)
 async def search_users(username_search: Optional[str] = None, skip: Optional[int] = 0, length: Optional[int] = 25,
                        client=Depends(inject_mongo_client)):
-    users_collection = client[SETTINGS.DATABASE_NAME]["users"]
+    users_collection = client[settings.mongodb_database]["users"]
     query_dictionary = {}
     if username_search:
         query_dictionary["username"] = {

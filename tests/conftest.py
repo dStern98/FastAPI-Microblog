@@ -1,27 +1,30 @@
 import pytest
 import pymongo
 from fastapi.testclient import TestClient
-from app.main import app
-from app.routers.connectDB import SETTINGS
+from app.main import create_app
+from app.routers.connectDB import settings
 from app.models import CreateUser
 import datetime
-from app.oauth2 import create_access_token
-from app.utils import hash_password
+from app.auth import create_access_token
+from app.utils import hash_password, mongoURI
+
 """
 For the purpose of settings up or tearing down the databases, there is no need to use Motor
 """
-pymongo_client = pymongo.MongoClient(SETTINGS.MONGO_URI)
+pymongo_client = pymongo.MongoClient(mongoURI)
+app = create_app()
 
 
 @pytest.fixture
 def test_client():
+
     with TestClient(app) as client:
         yield client
 
 
 @pytest.fixture
 def clear_collections():
-    database = pymongo_client[SETTINGS.DATABASE_NAME]
+    database = pymongo_client[settings.mongodb_database]
     collections = ["users", "posts", "votes"]
     for collection in collections:
         try:
@@ -64,7 +67,7 @@ def get_posts():
 
 @pytest.fixture
 def login_user1():
-    users_collection = pymongo_client[SETTINGS.DATABASE_NAME]['users']
+    users_collection = pymongo_client[settings.mongodb_database]['users']
     users_data1 = {
         "email": "Tevye@gmail.com",
         "username": "TevyeTheMilkman",
@@ -85,7 +88,7 @@ def login_user1():
 
 @pytest.fixture
 def login_user2():
-    users_collection = pymongo_client[SETTINGS.DATABASE_NAME]['users']
+    users_collection = pymongo_client[settings.mongodb_database]['users']
     users_data2 = {
         "email": "jonsnow@gmail.com",
         "username": "KingInTheNorth",

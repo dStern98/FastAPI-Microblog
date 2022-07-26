@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
-from .connectDB import inject_mongo_client, SETTINGS
+from .connectDB import inject_mongo_client, settings
 from ..models import Action, postGetAction
 from ..controllers.voting_logic import VotingLogic
-from ..oauth2 import get_current_user
+from ..auth import get_current_user
 from typing import Optional
 
 router = APIRouter(prefix="/vote", tags=["Vote"])
@@ -15,8 +15,8 @@ The "/postVotes" endpoint allows anyone to access the likes/dislikes users list 
 
 @router.post("/")
 async def like_post(postID: str, action_type: Action, current_user=Depends(get_current_user), client=Depends(inject_mongo_client)):
-    posts_collection = client[SETTINGS.DATABASE_NAME]["posts"]
-    votes_collection = client[SETTINGS.DATABASE_NAME]["votes"]
+    posts_collection = client[settings.mongodb_database]["posts"]
+    votes_collection = client[settings.mongodb_database]["votes"]
 
     # Refactored the Voting Logic into it own file
     response = await VotingLogic(votes_collection=votes_collection, posts_collection=posts_collection,
@@ -28,7 +28,7 @@ async def like_post(postID: str, action_type: Action, current_user=Depends(get_c
 @router.post("/userVotes/")
 async def check_if_user_voted(list_of_posts: postGetAction, current_user=Depends(get_current_user),
                               client=Depends(inject_mongo_client)):
-    votes_collection = client[SETTINGS.DATABASE_NAME]["votes"]
+    votes_collection = client[settings.mongodb_database]["votes"]
     user_vote_actions = await votes_collection.find({"userID": current_user.userID,
                                                     "postID": {"$in": list_of_posts.dict()["postIDs"]}}).to_list(length=100)
     for document in user_vote_actions:
@@ -38,7 +38,7 @@ async def check_if_user_voted(list_of_posts: postGetAction, current_user=Depends
 
 @router.post("/postVotes/")
 async def find_post_votes(postID: str, skip: Optional[int] = 0, client=Depends(inject_mongo_client)):
-    votes_collection = client[SETTINGS.DATABASE_NAME]["votes"]
+    votes_collection = client[settings.mongodb_database]["votes"]
     post_votes = await votes_collection.find({"postID": postID}).skip(skip).to_list(length=100)
     for document in post_votes:
         del document["_id"]

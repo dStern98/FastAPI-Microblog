@@ -5,17 +5,38 @@ from typing import Optional, Union, List
 from enum import Enum
 
 ENV_PATH = path.join(path.dirname(__file__), "..", ".env")
+UVICORN_PREFIX = "uvicorn_"
 
 
 class Settings(BaseSettings):
-    MONGO_URI: str
-    SECRET: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    DATABASE_NAME: str
+
+    # Mongo settings
+    mongodb_host: str
+    mongodb_port: Optional[int] = None
+    mongodb_user: str
+    mongodb_password: str
+    mongodb_database: Optional[str] = None
+    mongodb_driver: str
+    mongodb_params: Optional[dict] = None
+    mongodb_useAtlas: bool
+
+    # Uvicorn settings
+    uvicorn_host: str
+    uvicorn_port: int
+    uvicorn_reload: bool
+
+    # Auth Related
+    auth_secret_key: str
+    auth_algorithm: str
+    auth_token_expiration_minutes: int
 
     class Config:
         env_file = ENV_PATH
+
+    # Access all of the Uvicorn .env vars
+    def get_uvicorn_settings(self) -> dict:
+        return {attr.replace(UVICORN_PREFIX, ''): getattr(self, attr)
+                for attr in dir(self) if attr.startswith(UVICORN_PREFIX)}
 
 
 """

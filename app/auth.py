@@ -1,6 +1,6 @@
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException, status, Depends
-from .routers.connectDB import SETTINGS, inject_mongo_client
+from .routers.connectDB import settings, inject_mongo_client
 import datetime
 from jose import JWTError, jwt
 from .models import TokenData, ReadUser
@@ -9,9 +9,9 @@ from .utils import verify_object_ID
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-SECRET_KEY = SETTINGS.SECRET
-ALGORITHM = SETTINGS.ALGORITHM
-ACCESS_TOKEN_EXPIRE_MINUTES = SETTINGS.ACCESS_TOKEN_EXPIRE_MINUTES
+SECRET_KEY = settings.auth_secret_key
+ALGORITHM = settings.auth_algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.auth_token_expiration_minutes
 
 """
 Create JWT Tokens, Verify JWT Tokens, get_current_user to be used for all guarded routes
@@ -40,7 +40,7 @@ def verify_access_token(token: str):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), client=Depends(inject_mongo_client)):
-    users_collection = client[SETTINGS.DATABASE_NAME]["users"]
+    users_collection = client[settings.mongodb_database]["users"]
 
     token_model = verify_access_token(token)
     try:

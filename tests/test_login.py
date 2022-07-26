@@ -1,11 +1,11 @@
 from jose import jwt
-from app.routers.connectDB import SETTINGS
+from app.routers.connectDB import settings
 
 
 def test_login_no_user(clear_collections, test_client):
     login_response = test_client.post(
         "/login/", data={"username": "does not exist", "password": "password123"})
-    assert login_response.status_code == 403
+    assert login_response.status_code == 401
 
 
 def test_login_bad_password(clear_collections, get_users, login_user1, test_client):
@@ -14,7 +14,7 @@ def test_login_bad_password(clear_collections, get_users, login_user1, test_clie
         "username", "password"]}
     user1_password_form["password"] = "incorrectpassword"
     login_response = test_client.post("/login/", data=user1_password_form)
-    assert login_response.status_code == 403
+    assert login_response.status_code == 401
 
 
 def test_correct_login(clear_collections, get_users, login_user1, test_client):
@@ -25,8 +25,8 @@ def test_correct_login(clear_collections, get_users, login_user1, test_client):
     assert login_response.status_code == 200
 
     token = login_response.json()["access_token"]
-    payload = jwt.decode(token, SETTINGS.SECRET,
-                         algorithms=[SETTINGS.ALGORITHM])
+    payload = jwt.decode(token, settings.auth_secret_key,
+                         algorithms=[settings.auth_algorithm])
     userID = payload.get("userID")
     user_from_token = test_client.get(
         "/users/search/", params={"username_search": user1["username"]})
