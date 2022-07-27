@@ -3,4 +3,5 @@ WORKDIR /microblog
 COPY requirements* .
 RUN find requirements* | xargs -i pip install -r {}
 COPY . .
+EXPOSE 8001
 ENTRYPOINT [ "python", "-m", "app" ]

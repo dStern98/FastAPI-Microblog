@@ -13,4 +13,6 @@ To use, see the Settings class in the file `./app/models`, which details the env
 
 If running the app using Docker in development mode, use the command `docker compose -f docker-compose.dev.yml -d`.
 If in production, use the command `docker compose -f docker-compose.prod.yml -d`. Note that the docker-compose files expect
-a .env file to be present in the root.
+a .env file to be present in the root. The dev build uses a bind mount to allow for the container to immediately update with new
+code. No environment variables are expressly written in the docker-compose files. Instead, the .env file is mounted into the container,
+and Pydantic automatically creates the environment variables.
