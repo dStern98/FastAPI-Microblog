@@ -1,4 +1,3 @@
-from http.client import HTTPException
 from fastapi import APIRouter, Depends, HTTPException, status
 from ..utils import verify_password
 from .connectDB import inject_mongo_client, settings
