@@ -65,7 +65,9 @@ async def update_post(postID: str, update_to_post: UpdatePostDB, current_user=De
 
     if not post_to_be_updated:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No such document.")
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No such document.")
+
     if post_to_be_updated["userID"] != current_user.userID:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"You cannot delete someone else's post.")

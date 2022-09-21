@@ -33,7 +33,8 @@ def hash_password(password: str):
 # Write a function to build a correct MongoURI from the env vars
 
 def build_mongo_URI(pydantic_settings: Settings) -> str:
-    URI = f"{pydantic_settings.mongodb_driver}://{pydantic_settings.mongodb_user}:{pydantic_settings.mongodb_password}@{pydantic_settings.mongodb_host}"
+    URI = f"{pydantic_settings.mongodb_driver}://{pydantic_settings.mongodb_user}"\
+        f":{pydantic_settings.mongodb_password}@{pydantic_settings.mongodb_host}"
     if pydantic_settings.mongodb_port:
         URI = f"{URI}:{pydantic_settings.mongodb_port}"
     if pydantic_settings.mongodb_database and pydantic_settings.mongodb_useAtlas:

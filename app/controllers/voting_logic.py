@@ -27,7 +27,10 @@ class VotingLogic:
     async def __check_post_vote_status(self):
         # check if the person has already liked the page
         try:
-            already_voted: dict = await self.votes_collection.find_one({"userID": self.userID, "postID": self.postID})
+            already_voted: dict = await self.votes_collection.find_one({
+                "userID": self.userID,
+                "postID": self.postID}
+            )
             self.already_voted = already_voted.get("action")
         except Exception:
             self.already_voted = None
@@ -36,7 +39,12 @@ class VotingLogic:
         if self.already_voted == self.action:
             await asyncio.gather(
                 self.votes_collection.delete_one(
-                    {"userID": self.userID, "postID": self.postID, "action": self.already_voted}),
+                    {
+                        "userID": self.userID,
+                        "postID": self.postID,
+                        "action": self.already_voted
+                    }),
+
                 self.posts_collection.update_one({"_id": self.post_object_id},
                                                  {"$set": {self.action_map[self.action]:
                                                            self.post_to_like[self.action_map[self.action]] - 1}})
@@ -46,6 +54,7 @@ class VotingLogic:
             await asyncio.gather(
                 self.votes_collection.update_one({"userID": self.userID,
                                                   "postID": self.postID}, {"$set": {"action": self.action}}),
+
                 self.posts_collection.update_one({"_id": self.post_object_id},
                                                  {"$set": {self.action_map[self.action]:
                                                            self.post_to_like[self.action_map[self.action]] + 1,
@@ -54,7 +63,9 @@ class VotingLogic:
             )
         else:
             new_vote_entry = {"userID": self.userID,
-                              "postID": self.postID, "action": self.action}
+                              "postID": self.postID,
+                              "action": self.action}
+
             await asyncio.gather(
                 self.votes_collection.insert_one(
                     LikeDislike(**new_vote_entry).dict()),

@@ -19,8 +19,11 @@ async def like_post(postID: str, action_type: Action, current_user=Depends(get_c
     votes_collection = client[settings.mongodb_database]["votes"]
 
     # Refactored the Voting Logic into it own file
-    response = await VotingLogic(votes_collection=votes_collection, posts_collection=posts_collection,
-                                 postID=postID, action=action_type.action, userID=current_user.userID).ApplyVotingLogic()
+    response = await VotingLogic(votes_collection=votes_collection,
+                                 posts_collection=posts_collection,
+                                 postID=postID,
+                                 action=action_type.action,
+                                 userID=current_user.userID).ApplyVotingLogic()
 
     return response
 
